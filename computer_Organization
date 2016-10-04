@@ -1,0 +1,166 @@
+.data  
+str1: .space 20
+
+string: .asciiz"\n----------- A NEW COURT -------------\n"
+msg1:.asciiz "1. The name of the judge: "  
+msg2:.asciiz "2. The number of people in the jury: "
+str2: .asciiz "Miscreant\n"
+str3: .asciiz "Villain\n"
+msg3:.asciiz "\nMiscreant is choice\n"   
+msg5:.asciiz "\nVillain is choice\n"  
+msg4:.asciiz "\nTHERE IS NO JUDGE NAMED AS "  
+msg6:.asciiz "\nMiscreant in islemler yapilacak"  
+msg7:.asciiz "\nRule1 e gore rusvet" 
+msg8:.asciiz "\nVillain in islemler yapilacak" 
+
+.text
+.globl main
+main:  
+    li $v0,4        #string ekrana bas 
+    la $a0,string  
+    syscall
+	
+    li $v0,4        #mesajı bas 
+    la $a0,msg1  
+    syscall
+	
+    li $v0,8
+    la $a0,str1
+    addi $a1,$zero,20
+    syscall          #stringi al
+ 
+    la $a0,str1         # a0 'a userin girdigi stringi at 
+    la $a1,str2         # a1 'e Miscreant ı at
+    la $a2,str3         # a2 'e Villain ı at
+	li $t9,0 #her defasinda sifirlamam gerekli
+    jal CompareforMiscreant      #fonksiyonu cagır
+	beq $v0,$zero,sameforMiscreant    # kontrol ediliyor.
+	jal CompareforVillain      #fonksiyonu cagır
+	
+    beq $v0,$zero,sameforVillain    # kontrol ediliyor.
+    li $v0,4
+    la $a0,msg4       #aynı degil ise msg4 ekrana basiliyor.
+    syscall
+    li $v0,4
+    la $a0,str1       #daha sonra string basiliyor.
+    syscall
+    j main
+	
+control: #juri sayisinin degerinin kontrolu
+	li $v0,4        #mesajı bas
+    	la $a0,msg2  
+    syscall
+	li $v0,5    #integer al
+	syscall
+	blez $v0,control #eger registerdaki deger 0 dan büyükse controle dön
+        move $t0,$v0 # integer t0 da
+	li $v0,1    #integeri ekrana bas
+	move $a0,$t0
+	move $t3,$t0 # kacar kacar artacagi, a diyelim
+    	li $t2,1 # önce t2de sıfır var
+    	li $t7,20 # önce t7 20
+	syscall
+	bne $t9,9  multiplicationforMiscreant
+	j multiplicationforVillain
+        
+	         
+
+	
+sameforMiscreant:   #aynı ise bu conditional a giriyor.
+	addi $t9,8 # control amacli
+    j control #artik juri sayisini alabiliriz
+	
+sameforVillain:   #aynı ise bu conditional a giriyor.
+	addi $t9,9 # control amacli
+    j control #artik juri sayisini alabiliriz
+	
+	
+exit:  
+    li $v0,10  
+    syscall  
+
+
+
+calculate1: # Miscreant ın islemleri
+	li $v0,4  
+    	la $a0,msg6  
+    	syscall
+    	addi $t2,$t0,8000
+    	li $v0,4  
+    	la $a0,msg7   
+    	syscall
+    	li $v0,1    #integeri ekrana bas
+	move $a0,$t2
+	syscall
+    	j main
+    	
+    	
+    	
+multiplicationforMiscreant:
+	add $t0,$t0,$t3 # x+=a
+	addi $t2,$t2,1
+	beq $t7,$t2,calculate1
+	j multiplicationforMiscreant
+	
+	
+
+CompareforMiscreant:  # argumanlari temporary regısterda tutuyoruz
+    addi $t0,$zero,0
+    add $t1,$zero,$a0  # user input
+    add $t2,$zero,$a1  # Miscreant
+
+loopForMiscreant:  
+    lb $t3($t1)         # user in girdigi stringden  bir byte yukluyor.
+    lb $t4($t2) 	 # Miscreant stringinden  bir byte yukluyor.
+    beqz $t3,control2    # eger 0 ise string sonudur, controle git
+    beqz $t4,son    # eger 0 ise string sonudur, sona git
+    slt $t5,$t3,$t4     #iki string i kontrol ediyor, t3 t4 den kucuk ise t5 e 1 koy 
+    bnez $t5,son   # eger 1 ise sona git
+    addi $t1,$t1,1      # artık ikinci byte lari kntrol etme zamani, t1 bir sonraki byte i gösteryor  
+    addi $t2,$t2,1   # artık ikinci byte lari kntrol etme zamani, t2 bir sonraki byte i gösteryor 
+    j loopForMiscreant  
+
+calculate2: # Villain ın islemleri
+	li $v0,4  
+    	la $a0,msg8   
+    	syscall
+    	addi $t2,$t0,8000
+    	li $v0,4  
+    	la $a0,msg7   
+    	syscall
+    	li $v0,1    #integeri ekrana bas
+	move $a0,$t2
+	syscall
+    	j main
+	
+multiplicationforVillain:
+	add $t0,$t0,$t3 # x+=a
+	addi $t2,$t2,1
+	beq $t7,$t2,calculate2
+	j multiplicationforVillain
+	
+CompareforVillain:  # argumanlari temporary regısterda tutuyoruz
+    addi $t0,$zero,0
+    add $t1,$zero,$a0  # user input
+    add $t2,$zero,$a2  # Villain
+
+loopForVillain:  
+    lb $t3($t1)         # user in girdigi stringden  bir byte yukluyor.
+    lb $t4($t2) 	 # Villain stringinden  bir byte yukluyor.
+    beqz $t3,control2    # eger 0 ise string sonudur, controle git
+    beqz $t4,son    # eger 0 ise string sonudur, sona git
+    slt $t5,$t3,$t4     #iki string i kontrol ediyor, t3 t4 den kucuk ise t5 e 1 koy 
+    bnez $t5,son   # eger 1 ise sona git
+    addi $t1,$t1,1      # artık ikinci byte lari kntrol etme zamani, t1 bir sonraki byte i gösteryor  
+    addi $t2,$t2,1   # artık ikinci byte lari kntrol etme zamani, t2 bir sonraki byte i gösteryor 
+    j loopForVillain  
+
+son:   
+    addi $v0,$zero,1  # eger olumluysa v0 1
+    j endfunction  
+control2:  
+    bnez $t4,son #eger 0 a esit degilse Miscreant 
+    add $v0,$zero,$zero  # eger olumsuzsa v0 0
+
+endfunction:  
+    jr $ra #kaldigi yerden devam et
